@@ -1,0 +1,116 @@
+---
+title: "DATA 607 Homework 4"
+author: "Shane Hylton"
+date: "9/26/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Homework 4
+
+```{r}
+link <- "https://raw.githubusercontent.com/st3vejobs/607hw4data/main/israeli_vaccination_data_analysis_start.csv"
+clean <- function(x){
+  as.numeric( gsub('[^a-zA-Z0-9.]', '', x))
+  }
+library(stringr)
+data <- readLines(link)
+data <- data[-c(14:27)]
+data <- data[-c(1:9)]
+data1 <- data[1]
+data2 <- data[2]
+data3 <- data[3]
+data4 <- data[4]
+data1 <- str_remove_all(data1, "<50,")
+mils1 <- c(str_extract_all(data1, '\\d+\\,\\d+\\,\\d+'))
+r1 <- c(str_remove_all(data1, '\\d+\\,\\d+\\,\\d+'))
+r1 <- c(str_extract_all(r1, '\\d+'))
+r1 <- c(as.numeric(unlist(r1)))
+mils1 <- c(str_remove_all(mils1, "[,]"))
+mils1 <- c(str_extract_all(mils1, '\\d+'))
+mils1 <- c(as.numeric(unlist(mils1)))
+row1 <- c(mils1, r1)
+
+
+```
+
+Row 2 Construction
+
+```{r}
+
+data2 <- c(str_extract_all(data2, '\\d+\\.\\d+'))
+data2
+row2 <- unlist(data2)
+row2
+row2 <- c(as.numeric(row2))
+row2
+```
+
+
+Row 3 Construction
+```{r}
+
+data3 <- str_remove_all(data3, ">50,")
+mils3 <- c(str_extract(data3, '\\d+\\,\\d+\\,\\d+'))
+mils3 <- clean(mils3)
+thou3 <- c(str_extract(data3, '\\d+\\,\\d+'))
+thou3 <- clean(thou3)
+r3 <- c(str_remove_all(data3, '\\d+\\,\\d+\\,\\d+'))
+r3 <- c(str_extract_all(r3, '\\,\\d+\\,\\d+'))
+r3 <- c(str_extract_all(r3, '\\d+'))
+r3 <- c(as.numeric(unlist(r3)))
+row3 <- c(thou3, mils3, r3)
+row3
+```
+
+Row 4 Construction
+
+```{r}
+
+data4 <- c(str_extract_all(data4, '\\d+\\.\\d+'))
+data4
+row4 <- unlist(data4)
+row4
+row4 <- c(as.numeric(row4))
+row4
+```
+
+
+Dataframe Construction
+
+
+```{r}
+
+final <- data.frame()
+final <- rbind(final, c(row1, row2, row4, row3))
+
+
+colnames(final) <- c("under_50_unvax", "under_50_vax", "under_50_severe_100k_unvax", "under_50_severe_100k_vax","under_50_unvax_pct", "under_50_vax_pct", "over_50_unvax_pct", "over_50_vax_pct", "over_50_unvax", "over_50_vax", "over_50_severe_100k_unvax", "over_50_severe_100k_vax")
+
+```
+
+
+## Calculations
+
+(1)
+No, there is not enough information to calculate the total population. The issue here is that some people may be partially vaccinated, and no data has been provided for the partially vaccinated individuals in the population. The calculation for the population of unvaccinated and fully vaccinated individuals is below. 
+
+```{r}
+population <- final$under_50_unvax + final$under_50_vax + final$over_50_unvax + final$over_50_vax
+population
+```
+
+(2)
+```{r}
+efficacy <- 1 - ((final$under_50_severe_100k_vax + final$over_50_severe_100k_vax)/100000) / ((final$under_50_severe_100k_unvax + final$over_50_severe_100k_unvax)/100000)
+efficacy
+```
+According to the data, the efficacy vs. severe disease is negative. This would indicate that the vaccine is actually worse for protecting against severe disease. This result does not seem accurate to me, because it is counter-intuitive. The data may be slightly skewed because there are very few unvaccinated people who are over 50, which could provide an improper sample. I am interested to see if deaths are included in the severe cases or if they are removed from the count. 
+
+(3)
+
+The rate of severe cases in unvaccinated individuals vs. vaccinated individuals is evident in the calculation. From the calculation, it is easy to see that the rate of severe infection is higher in the vaccinated population than it is in the unvaccinated population.
+
